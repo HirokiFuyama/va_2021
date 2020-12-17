@@ -10,8 +10,8 @@ class VAE(nn.Module):
         super(VAE, self).__init__()
 
         self.fc1 = nn.Linear(784, 400)
-        self.fc21 = nn.Linear(400, 20)
-        self.fc22 = nn.Linear(400, 20)
+        self.fc21 = nn.Linear(400, 20)  # mu
+        self.fc22 = nn.Linear(400, 20)  # logvar
         self.fc3 = nn.Linear(20, 400)
         self.fc4 = nn.Linear(400, 784)
 
@@ -21,6 +21,7 @@ class VAE(nn.Module):
 
     def reparameterize(self, mu, logvar):
         std = torch.exp(0.5*logvar)
+        #  randn_like : Gaussian Arg:Tensor
         eps = torch.randn_like(std)
         return mu + eps*std
 
