@@ -1,19 +1,20 @@
 import torch
 import torch.utils.data
-from torch import nn, optim
+from torch import nn
 from torch.nn import functional as F
 
 
 class VAE(nn.Module):
 
-    def __init__(self):
+    def __init__(self, input_dim, z_dim):
         super(VAE, self).__init__()
+        self.input_dim = input_dim
 
-        self.fc1 = nn.Linear(784, 400)
-        self.fc21 = nn.Linear(400, 20)  # mu
-        self.fc22 = nn.Linear(400, 20)  # logvar
-        self.fc3 = nn.Linear(20, 400)
-        self.fc4 = nn.Linear(400, 784)
+        self.fc1 = nn.Linear(input_dim, 256)
+        self.fc21 = nn.Linear(256, z_dim)  # mu
+        self.fc22 = nn.Linear(256, z_dim)  # logvar
+        self.fc3 = nn.Linear(z_dim, 256)
+        self.fc4 = nn.Linear(256, input_dim)
 
     def encode(self, x):
         h1 = F.relu(self.fc1(x))
@@ -30,6 +31,6 @@ class VAE(nn.Module):
         return torch.sigmoid(self.fc4(h3))
 
     def forward(self, x):
-        mu, logvar = self.encode(x.view(-1, 784))
+        mu, logvar = self.encode(x.view(-1, self.input_dim))
         z = self.reparameterize(mu, logvar)
         return self.decode(z), mu, logvar
