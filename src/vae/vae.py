@@ -35,7 +35,8 @@ class VAE(nn.Module):
     def forward(self, x):
         mu, logvar = self.encode(x.view(-1, self.input_dim))
         z = self.reparameterize(mu, logvar)
-        return self.decode(z), mu, logvar
+        z = self.decode(z)
+        return z,  mu, logvar
 
 
 class ImageTransform:
