@@ -17,7 +17,7 @@ class Config:
     lr: float = 1e-3
     beta1:float = 0.9
     beta2:float = 0.9
-    input_dim: int = 500
+    input_dim: int = 16384
     num_epoch: int = 100
     num_stopping: int = 50
     batch_size: int = 256
@@ -26,7 +26,7 @@ class Config:
 
 
 def loss_function(recon_x, x, mu, logvar, config=Config()):
-    bce = F.binary_cross_entropy_with_logits(recon_x, x, x.view(-1, config.input_dim), reduction='sum')
+    bce = F.binary_cross_entropy_with_logits(recon_x, x.view(-1, config.input_dim), reduction='sum')
     kld = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
     return bce + kld
 
@@ -56,6 +56,10 @@ def train(train_dataloader, eval_dataloader, model, config=Config()):
         for images in train_dataloader:
 
             images = images.to(device)
+
+            # For liner vae
+            images = images.view(-1, config.input_dim)
+
             pred, mu, logvar = model(images)
 
             loss = loss_function(pred, images, mu, logvar)
@@ -75,6 +79,10 @@ def train(train_dataloader, eval_dataloader, model, config=Config()):
         for images in eval_dataloader:
 
             images = images.to(device)
+
+            # For liner vae
+            images = images.view(-1, config.input_dim)
+
             pred, mu, logvar = model(images)
 
             loss = loss_function(pred, images, mu, logvar)
