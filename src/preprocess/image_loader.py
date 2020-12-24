@@ -28,7 +28,7 @@ class ImgDataset(data.Dataset):
 
     def __getitem__(self, index):
         """
-        Convert image to Tensor data type.
+        Convert type of image to Tensor.
         """
         img_path = self.file_list[index]
         img = Image.open(img_path)
