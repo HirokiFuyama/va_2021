@@ -14,9 +14,9 @@ from src.preprocess.image_loader import ImgDataset, ImageTransform
 
 @dataclass
 class Config:
-    lr: float = 1e-3
-    beta1:float = 0.9
-    beta2:float = 0.9
+    lr: float = 1e-5
+    beta1: float = 0.9
+    beta2: float = 0.9
     input_dim: int = 16384
     num_epoch: int = 100
     num_stopping: int = 50
