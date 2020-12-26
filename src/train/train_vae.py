@@ -155,8 +155,10 @@ def process(train_dir_path, eval_dir_path, config=Config()):
     # save model
     model.save(model, config.save_path)
 
+    return model
 
-if __name__ == '__main__':
-    t_dir_path = ''
-    e_dir_path = ''
-    process(t_dir_path, e_dir_path)
+
+# if __name__ == '__main__':
+#     t_dir_path = ''
+#     e_dir_path = ''
+#     process(t_dir_path, e_dir_path)
