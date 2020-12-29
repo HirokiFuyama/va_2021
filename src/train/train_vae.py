@@ -85,6 +85,12 @@ def train(train_dataloader, eval_dataloader, model, config):
 
             pred, mu, logvar = model(images)
 
+            # check pred
+            x = pred.to('cpu').detach().numpy().copy()
+            x = x[0].reshape(128, 128)
+            import matplotlib.pyplot as plt
+            plt.imshow(x)
+
             loss = loss_function(pred, images, mu, logvar, config)
 
             eval_epoch_loss += loss.item()
