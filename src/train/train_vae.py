@@ -12,26 +12,26 @@ from src.vae.vae import VAE
 from src.preprocess.image_loader import ImgDataset, ImageTransform
 
 
-@dataclass
-class Config:
-    lr: float = 1e-5
-    beta1: float = 0.9
-    beta2: float = 0.9
-    input_dim: int = 16384
-    num_epoch: int = 100
-    num_stopping: int = 50
-    batch_size: int = 256
-    z_dim: int = 50
-    save_path: str = '../../model/vae.pt'
+# @dataclass
+# class Config:
+#     lr: float = 1e-5
+#     beta1: float = 0.9
+#     beta2: float = 0.9
+#     input_dim: int = 16384
+#     num_epoch: int = 100
+#     num_stopping: int = 50
+#     batch_size: int = 256
+#     z_dim: int = 50
+#     save_path: str = '../../model/vae.pt'
 
 
-def loss_function(recon_x, x, mu, logvar, config=Config()):
+def loss_function(recon_x, x, mu, logvar, config):
     bce = F.binary_cross_entropy_with_logits(recon_x, x.view(-1, config.input_dim), reduction='sum')
     kld = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
     return bce + kld
 
 
-def train(train_dataloader, eval_dataloader, model, config=Config()):
+def train(train_dataloader, eval_dataloader, model, config):
 
     # check GPU
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -62,7 +62,7 @@ def train(train_dataloader, eval_dataloader, model, config=Config()):
 
             pred, mu, logvar = model(images)
 
-            loss = loss_function(pred, images, mu, logvar)
+            loss = loss_function(pred, images, mu, logvar, config)
 
             optimizer.zero_grad()
             loss.backward()
@@ -85,7 +85,7 @@ def train(train_dataloader, eval_dataloader, model, config=Config()):
 
             pred, mu, logvar = model(images)
 
-            loss = loss_function(pred, images, mu, logvar)
+            loss = loss_function(pred, images, mu, logvar, config)
 
             eval_epoch_loss += loss.item()
             n_e += 1
@@ -130,7 +130,7 @@ def train(train_dataloader, eval_dataloader, model, config=Config()):
     return models[low_index + 1]
 
 
-def process(train_dir_path, eval_dir_path, config=Config()):
+def process(train_dir_path, eval_dir_path, config):
 
     # params of normalization
     _mean = 0
@@ -150,12 +150,12 @@ def process(train_dir_path, eval_dir_path, config=Config()):
     vae = VAE(config.input_dim, config.z_dim)
 
     # train model
-    model = train(train_dataloader, eval_dataloader, vae)
+    model = train(train_dataloader, eval_dataloader, vae, config)
 
     # save model
     model.save(model, config.save_path)
 
-    return model
+    return mode
 
 
 # if __name__ == '__main__':
