@@ -153,9 +153,9 @@ def process(train_dir_path, eval_dir_path, config):
     model = train(train_dataloader, eval_dataloader, vae, config)
 
     # save model
-    model.save(model, config.save_path)
+    torch.save(model.state_dict(), config.save_path)
 
-    return mode
+    # return model
 
 
 # if __name__ == '__main__':
