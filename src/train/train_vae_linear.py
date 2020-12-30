@@ -8,7 +8,7 @@ from torch.nn import functional as F
 import matplotlib.pyplot as plt
 
 from src.preprocess.image_loader import ImgDataset, ImageTransform
-from src.vae.vae import VAE
+from src.vae.vae_linear import VAE
 
 
 # @dataclass
