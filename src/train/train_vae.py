@@ -41,6 +41,7 @@ def train(train_dataloader, eval_dataloader, model, config):
 
     models = []
     eval_loss = []
+    generated_images = []
     for epoch in range(config.num_epoch):
         t_epoch_start = time.time()
 
@@ -130,10 +131,11 @@ def train(train_dataloader, eval_dataloader, model, config):
         if epoch % 20 == 0:
             x = pred.to('cpu').detach().numpy().copy()
             x = x[0].reshape(128, 128)
+            generated_images.append(x)
             plt.imshow(x)
             plt.show()
 
-    return models[low_index + 1]
+    return models[low_index + 1], generated_images
 
 
 def process(train_dir_path, eval_dir_path, config):
@@ -156,12 +158,12 @@ def process(train_dir_path, eval_dir_path, config):
     vae = VAE(config.input_dim, config.z_dim)
 
     # train model
-    model = train(train_dataloader, eval_dataloader, vae, config)
+    model, generated = train(train_dataloader, eval_dataloader, vae, config)
 
     # save model
     torch.save(model.state_dict(), config.save_path)
 
-    # return model
+    return generated
 
 
 # if __name__ == '__main__':
