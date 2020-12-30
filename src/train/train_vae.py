@@ -85,13 +85,6 @@ def train(train_dataloader, eval_dataloader, model, config):
 
             pred, mu, logvar = model(images)
 
-            # check generated image
-            if n_e % 20 == 0:
-                x = pred.to('cpu').detach().numpy().copy()
-                x = x[0].reshape(128, 128)
-                plt.imshow(x)
-                plt.show()
-
             loss = loss_function(pred, images, mu, logvar, config)
 
             eval_epoch_loss += loss.item()
@@ -133,6 +126,13 @@ def train(train_dataloader, eval_dataloader, model, config):
         t_epoch_finish = time.time()
         print('Eval_Epoch_Loss:{:.4f}'.format(eval_epoch_loss / n_e))
         print('timer:  {:.4f} sec.'.format(t_epoch_finish - t_epoch_start))
+
+        # check generated image ---------------------------------------------------
+        if epoch % 20 == 0:
+            x = pred.to('cpu').detach().numpy().copy()
+            x = x[0].reshape(128, 128)
+            plt.imshow(x)
+            plt.show()
 
     return models[low_index + 1]
 
