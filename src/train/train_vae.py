@@ -1,15 +1,15 @@
-from dataclasses import dataclass
-import time
 import glob
-import torch
-import numpy as np
-import torch.utils.data
-from torch import nn, optim
-from torch.nn import functional as F
-from torchvision import datasets, transforms
+import time
 
-from src.vae.vae import VAE
+import matplotlib.pyplot as plt
+import numpy as np
+import torch
+import torch.utils.data
+from torch import optim
+from torch.nn import functional as F
+
 from src.preprocess.image_loader import ImgDataset, ImageTransform
+from src.vae.vae import VAE
 
 
 # @dataclass
@@ -85,11 +85,12 @@ def train(train_dataloader, eval_dataloader, model, config):
 
             pred, mu, logvar = model(images)
 
-            # check pred
-            x = pred.to('cpu').detach().numpy().copy()
-            x = x[0].reshape(128, 128)
-            import matplotlib.pyplot as plt
-            plt.imshow(x)
+            # check generated image
+            if n_e % 20 == 0:
+                x = pred.to('cpu').detach().numpy().copy()
+                x = x[0].reshape(128, 128)
+                plt.imshow(x)
+                plt.show()
 
             loss = loss_function(pred, images, mu, logvar, config)
 
