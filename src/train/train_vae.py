@@ -1,12 +1,11 @@
 import glob
 import time
-
-import matplotlib.pyplot as plt
-import numpy as np
 import torch
+import numpy as np
 import torch.utils.data
 from torch import optim
 from torch.nn import functional as F
+import matplotlib.pyplot as plt
 
 from src.preprocess.image_loader import ImgDataset, ImageTransform
 from src.vae.vae import VAE
