@@ -38,7 +38,7 @@ def train(train_dataloader, eval_dataloader, model, config):
 
     model = model.to(device)
     optimizer = optim.Adam(model.parameters(), lr=config.lr, betas=[config.beta1, config.beta2])
-
+    
     models = []
     eval_loss = []
     generated_images = []
@@ -58,7 +58,7 @@ def train(train_dataloader, eval_dataloader, model, config):
             images = images.to(device)
 
             # For liner vae
-            images = images.view(-1, config.input_dim)
+            # images = images.view(-1, config.input_dim)
 
             pred, mu, logvar = model(images)
 
@@ -81,7 +81,7 @@ def train(train_dataloader, eval_dataloader, model, config):
             images = images.to(device)
 
             # For liner vae
-            images = images.view(-1, config.input_dim)
+            # images = images.view(-1, config.input_dim)
 
             pred, mu, logvar = model(images)
 
