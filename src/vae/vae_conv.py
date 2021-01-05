@@ -12,20 +12,20 @@ class VAE(nn.Module):
         # encoder -------------------------------------------------------------------------------------------------
 
         self.layer1 = nn.Sequential(
-            nn.Conv2d(self.channels, image_size, kernel_size=4,
-                      stride=2, padding=1),
+            nn.Conv2d(self.channels, image_size, 
+                      kernel_size=4, stride=2, padding=1),
             nn.LeakyReLU(0.2, inplace=True))
 
         self.layer2 = nn.Sequential(
-            nn.Conv2d(image_size, image_size*2, kernel_size=4,
-                      stride=2, padding=1),
+            nn.Conv2d(image_size, image_size*2,
+                       kernel_size=4, stride=2, padding=1),
             nn.LeakyReLU(0.2, inplace=True),
             # nn.Dropout2d(0.25)
             )
 
         self.layer3 = nn.Sequential(
-            nn.Conv2d(image_size*2, image_size*4, kernel_size=4,
-                      stride=2, padding=1),
+            nn.Conv2d(image_size*2, image_size*4,
+                       kernel_size=4, stride=2, padding=1),
             nn.LeakyReLU(0.2, inplace=True),
             # nn.Dropout2d(0.25)
         )
@@ -42,7 +42,7 @@ class VAE(nn.Module):
 
         self.layer7 = nn.Sequential(
             nn.ConvTranspose2d(image_size, image_size*2,
-                               kernel_size=4, stride=2),
+                               kernel_size=4, stride=2, padding=1),
             nn.BatchNorm2d(image_size*2),
             nn.ReLU(inplace=True))
 
@@ -58,15 +58,23 @@ class VAE(nn.Module):
             nn.Tanh())
 
     def encode(self, x):
+        # print(x.shape, 'input')
+    
         x = self.layer1(x)
+        # print(x.shape, 'lay1')
+    
         x = self.layer2(x)
+        # print(x.shape, 'lay2')
+    
         x = self.layer3(x)
+        # print(x.shape, 'lay3')
 
         x = x.view(x.size()[0], -1, self.input_dim*4)
-        # x = x.view(-1, self.input_dim*4)
+        # print(x.shape, 'x')
 
         mu = self.layer4(x)
         logvar = self.layer5(x)
+        # print(mu.shape, 'mu')
 
         return mu, logvar
 
@@ -77,21 +85,23 @@ class VAE(nn.Module):
         return mu + eps*std
 
     def decode(self, z):
-        # z = z.view(z.size()[0], self.z_dim, z.size()[1], -1)
-        print(z.shape, 'z')
+        # print('---------------Í---------------------------')
+        # print(z.shape, 'z')
+
         z = self.layer6(z)
-        print(z.shape, 'z1')
-        z = z.view(z.size()[0], self.input_dim, self.channels, -1)
-        print(z.shape, 'z2')
+        # print(z.shape, 'lay6')Í
+        
+        z = z.view(z.size()[0], self.input_dim, 16, 16)
+        # print(z.shape, 'z2')
 
         x = self.layer7(z)
-        print(x.shape, 'x1')
+        # print(x.shape, 'lay7')
 
         x = self.layer8(x)
-        print(x.shape, 'x2')
+        # print(x.shape, 'lay8')
 
         out = self.layer9(x)
-        print(out.shape)
+        # print(out.shape, 'lay9')
 
         return out
 
