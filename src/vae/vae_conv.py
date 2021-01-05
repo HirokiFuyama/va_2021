@@ -3,12 +3,16 @@ from torch import nn
 
 class VAE(nn.Module):
 
-    def __init__(self, image_size, z_dim):
+    def __init__(self, image_size, z_dim, channels=1):
         super(VAE, self).__init__()
         self.input_dim = image_size
+        self.z_dim = z_dim
+        self.channels = channels
+
+        # encoder -------------------------------------------------------------------------------------------------
 
         self.layer1 = nn.Sequential(
-            nn.Conv2d(1, image_size, kernel_size=4,
+            nn.Conv2d(self.channels, image_size, kernel_size=4,
                       stride=2, padding=1),
             nn.LeakyReLU(0.2, inplace=True))
 
@@ -20,35 +24,50 @@ class VAE(nn.Module):
             )
 
         self.layer3 = nn.Sequential(
-            nn.Conv2d(image_size, image_size*4, kernel_size=4,
+            nn.Conv2d(image_size*2, image_size*4, kernel_size=4,
                       stride=2, padding=1),
             nn.LeakyReLU(0.2, inplace=True),
             # nn.Dropout2d(0.25)
         )
 
+        # reparameterize -----------------------------------------------------------------------------------------
+
         self.layer4 = nn.Linear(image_size*4, z_dim)  # mu
         self.layer5 = nn.Linear(image_size*4, z_dim)  # logvar
 
-        self.layer6 = nn.Sequential(
-            nn.ConvTranspose2d(z_dim, image_size*4,
-                               kernel_size=4, stride=1),
-            nn.BatchNorm2d(image_size*4),
-            nn.ReLU(inplace=True))
+        # decoder -------------------------------------------------------------------------------------------------
+
+        self.layer6 = nn.Sequential(nn.Linear(z_dim, image_size),
+            nn.LeakyReLU(inplace=True))
 
         self.layer7 = nn.Sequential(
-            nn.ConvTranspose2d(image_size*2, image_size*2,
-                               kernel_size=4, stride=2, padding=1),
+            nn.ConvTranspose2d(image_size, image_size*2,
+                               kernel_size=4, stride=2),
             nn.BatchNorm2d(image_size*2),
             nn.ReLU(inplace=True))
 
-        self.layer8 = nn.Linear(image_size*2, image_size)
+        self.layer8 = nn.Sequential(
+            nn.ConvTranspose2d(image_size*2, image_size,
+                               kernel_size=4, stride=2, padding=1),
+            nn.BatchNorm2d(image_size),
+            nn.ReLU(inplace=True))
+
+        self.layer9 = nn.Sequential(
+            nn.ConvTranspose2d(image_size, self.channels,
+                               kernel_size=4, stride=2, padding=1),
+            nn.Tanh())
 
     def encode(self, x):
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
+
+        x = x.view(x.size()[0], -1, self.input_dim*4)
+        # x = x.view(-1, self.input_dim*4)
+
         mu = self.layer4(x)
         logvar = self.layer5(x)
+
         return mu, logvar
 
     def reparameterize(self, mu, logvar):
@@ -58,9 +77,22 @@ class VAE(nn.Module):
         return mu + eps*std
 
     def decode(self, z):
-        x = self.layer6(z)
-        x = self.layer7(x)
-        out = self.layer8(x)
+        # z = z.view(z.size()[0], self.z_dim, z.size()[1], -1)
+        print(z.shape, 'z')
+        z = self.layer6(z)
+        print(z.shape, 'z1')
+        z = z.view(z.size()[0], self.input_dim, self.channels, -1)
+        print(z.shape, 'z2')
+
+        x = self.layer7(z)
+        print(x.shape, 'x1')
+
+        x = self.layer8(x)
+        print(x.shape, 'x2')
+
+        out = self.layer9(x)
+        print(out.shape)
+
         return out
 
     def forward(self, x):
