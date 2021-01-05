@@ -25,7 +25,7 @@ from src.vae.vae_conv import VAE
 
 
 def loss_function(recon_x, x, mu, logvar, config):
-    bce = F.binary_cross_entropy_with_logits(recon_x, x.view(-1, config.input_dim), reduction='sum')
+    bce = F.binary_cross_entropy_with_logits(recon_x.view(-1, config.input_dim), x.view(-1, config.input_dim), reduction='sum')
     kld = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
     return bce + kld
 
@@ -61,7 +61,7 @@ def train(train_dataloader, eval_dataloader, model, config):
             # images = images.view(-1, config.input_dim)
 
             pred, mu, logvar = model(images)
-
+            
             loss = loss_function(pred, images, mu, logvar, config)
 
             optimizer.zero_grad()
