@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 
+
 class VAE(nn.Module):
 
     def __init__(self, image_size, z_dim, channels=1):
@@ -58,24 +59,12 @@ class VAE(nn.Module):
             nn.Tanh())
 
     def encode(self, x):
-        # print(x.shape, 'input')
-    
         x = self.layer1(x)
-        # print(x.shape, 'lay1')
-    
         x = self.layer2(x)
-        # print(x.shape, 'lay2')
-    
         x = self.layer3(x)
-        # print(x.shape, 'lay3')
-
         x = x.view(x.size()[0], -1, self.input_dim*4)
-        # print(x.shape, 'x')
-
         mu = self.layer4(x)
         logvar = self.layer5(x)
-        # print(mu.shape, 'mu')
-
         return mu, logvar
 
     def reparameterize(self, mu, logvar):
@@ -85,24 +74,11 @@ class VAE(nn.Module):
         return mu + eps*std
 
     def decode(self, z):
-        # print('---------------Í---------------------------')
-        # print(z.shape, 'z')
-
         z = self.layer6(z)
-        # print(z.shape, 'lay6')Í
-        
         z = z.view(z.size()[0], self.input_dim, 16, 16)
-        # print(z.shape, 'z2')
-
         x = self.layer7(z)
-        # print(x.shape, 'lay7')
-
         x = self.layer8(x)
-        # print(x.shape, 'lay8')
-
         out = self.layer9(x)
-        # print(out.shape, 'lay9')
-
         return out
 
     def forward(self, x):
