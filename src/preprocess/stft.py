@@ -1,22 +1,35 @@
+import numpy as np
 from scipy import signal
+from scipy import fftpack
 
 
-def stft(data, window=, slide=, fs=44100):
+def power_spectrum(data: np.ndarray, fs: int = 44100) -> np.ndarray:
+    ''' calculate power spectrum
 
-    return
+    zero padding at two times the length of data
 
-def power_spectrum(data: np.ndarray, fs: int = 50) -> np.ndarray:
+    Args:
+        data (np.ndarray): signal of sounds
+        fs (int): sampling frequency
+
+    Returns:
+        power (np.ndarray): power spectrum
+        freq (np.ndarray) : frequency
+
+    '''
 #     _n = len(data)
-    _n = int(len(data)*10)
+    _n = int(len(data)*2)
     power = fftpack.fft(data, n=_n)
     power = abs(power)[0:round(_n / 2)] ** 2 / _n
     power = 10 * np.log10(power)
     freq = np.arange(0, fs / 2, fs / _n)
     return power, freq
 
+
 def _hamming(data):
     win_hamming = signal.hamming(len(data))
     return data * win_hamming
+
 
 def stft(data, window=500, slide=50, fs=50):
     th = -30 # dB
