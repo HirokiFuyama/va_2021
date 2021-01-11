@@ -1,3 +1,4 @@
+import sys
 import glob
 import time
 import torch
@@ -5,23 +6,24 @@ import numpy as np
 import torch.utils.data
 from torch import optim
 from torch.nn import functional as F
+from dataclasses import dataclass
 import matplotlib.pyplot as plt
 
 from src.preprocess.image_loader import ImgDataset, ImageTransform
 from src.vae.vae_conv import VAE
 
 
-# @dataclass
-# class Config:
-#     lr: float = 1e-5
-#     beta1: float = 0.9
-#     beta2: float = 0.9
-#     input_dim: int = 16384
-#     num_epoch: int = 100
-#     num_stopping: int = 50
-#     batch_size: int = 256
-#     z_dim: int = 50
-#     save_path: str = '../../model/vae.pt'
+@dataclass
+class Config:
+    lr: float = 1e-4
+    beta1:float = 0.9
+    beta2:float = 0.9
+    input_dim: int = 128
+    num_epoch: int = 1000
+    num_stopping: int = 50
+    batch_size: int = 64
+    z_dim: int = 32
+    save_path: str = '../../model/vae.pt'
 
 
 def loss_function(recon_x, x, mu, logvar, config):
@@ -148,6 +150,10 @@ def process(train_dir_path, eval_dir_path, config):
     train_path_list = glob.glob(train_dir_path)
     eval_path_list = glob.glob(eval_dir_path)
 
+    if train_path_list == [] or eval_path_list == []:
+        print('FileNotFoundError: No such file or directory: ', file=sys.stderr)
+        sys.exit(1)
+
     # mk dataloader
     train_dataset = ImgDataset(file_list=train_path_list, transform=ImageTransform(_mean, _std))
     train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True)
@@ -166,7 +172,7 @@ def process(train_dir_path, eval_dir_path, config):
     return generated
 
 
-# if __name__ == '__main__':
-#     t_dir_path = ''
-#     e_dir_path = ''
-#     process(t_dir_path, e_dir_path)
+if __name__ == '__main__':
+    t_dir_path = rf'..\..\figure\spectrogram_png\train\*.png'
+    e_dir_path = rf'..\..\figure\spectrogram_png\test\*.png'
+    process(t_dir_path, e_dir_path, Config())
