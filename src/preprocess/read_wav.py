@@ -26,5 +26,6 @@ def read_wav(file_dir_path: str, file_no: int = None) -> list:
     else:
         file_path = file_path[:file_no]
     raw_data = [sf.read(file_path[i])[0] for i in range(len(file_path))]
+    raw_data = [i[int(len(i)/10): int(len(i)-len(i)/10)] for i in raw_data]
 
     return raw_data, file_path
