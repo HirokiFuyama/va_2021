@@ -54,7 +54,7 @@ def stft(data: np.ndarray, window: int = 10, slide: int = 1, fs: int = 44100):
         freq (list): frequency (unit:sec)
         time (np.ndarray): time (unit:sec)
     """
-    # th = 30  # db
+    # th = -30  # db
     power = []
     freq = []
     for i in range(0, len(data)-int(window*fs), int(slide*fs)):
