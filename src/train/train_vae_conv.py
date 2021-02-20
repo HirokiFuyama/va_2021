@@ -2,12 +2,14 @@ import sys
 import glob
 import time
 import torch
+import torchvision
 import numpy as np
 import torch.utils.data
 from torch import optim
 from torch.nn import functional as F
 from dataclasses import dataclass
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
+from torch.utils.tensorboard import SummaryWriter
 
 from src.preprocess.image_loader import ImgDataset, ImageTransform
 from src.vae.vae_conv import VAE
@@ -16,14 +18,16 @@ from src.vae.vae_conv import VAE
 @dataclass
 class Config:
     lr: float = 1e-4
-    beta1:float = 0.9
-    beta2:float = 0.9
+    beta1: float = 0.9
+    beta2: float = 0.9
     input_dim: int = 128
     num_epoch: int = 1000
-    num_stopping: int = 50
+    num_stopping: int = 5
     batch_size: int = 64
     z_dim: int = 32
-    save_path: str = '../../model/vae.pt'
+    save_path: str = '../../model/vae/vae.pt'
+    log_path: str = '../../log/vae/vae_lr_1e-4'
+
 
 
 def loss_function(recon_x, x, mu, logvar, config):
@@ -40,6 +44,8 @@ def train(train_dataloader, eval_dataloader, model, config):
 
     model = model.to(device)
     optimizer = optim.Adam(model.parameters(), lr=config.lr, betas=[config.beta1, config.beta2])
+
+    writer = SummaryWriter(log_dir=config.log_path)
     
     models = []
     eval_loss = []
@@ -55,6 +61,7 @@ def train(train_dataloader, eval_dataloader, model, config):
 
         model.train()
         train_epoch_loss = 0
+        n_t = 0
         for images in train_dataloader:
 
             images = images.to(device)
@@ -70,8 +77,10 @@ def train(train_dataloader, eval_dataloader, model, config):
             loss.backward()
             optimizer.step()
             train_epoch_loss += loss.item()
+            n_t += 1
 
-        print('Train epoch loss:{:.4f}'.format(train_epoch_loss / train_dataloader.batch_size))
+        # print('Train epoch loss:{:.4f}'.format(train_epoch_loss / train_dataloader.batch_size))
+        print('Train epoch loss:{:.4f}'.format(train_epoch_loss / n_t))
 
         # -------------------------------------------------------------------------------
 
@@ -97,6 +106,10 @@ def train(train_dataloader, eval_dataloader, model, config):
         # Early stopping -------------------------------------------------------
 
         eval_loss.append(eval_epoch_loss/n_e)
+
+        # To tensor board
+        writer.add_scalar('Train/loss', train_epoch_loss / n_t, epoch)
+        writer.add_scalar('Eval/loss', eval_epoch_loss / n_e, epoch)
 
         if epoch >= config.num_stopping:
             if epoch == config.num_stopping:
@@ -130,12 +143,12 @@ def train(train_dataloader, eval_dataloader, model, config):
         print('timer:  {:.4f} sec.'.format(t_epoch_finish - t_epoch_start))
 
         # check generated image ---------------------------------------------------
-        if epoch % 20 == 0:
-            x = pred.to('cpu').detach().numpy().copy()
-            x = x[0].reshape(128, 128)
-            generated_images.append(x)
-            plt.imshow(x)
-            plt.show()
+        if epoch % 10 == 0:
+            _generated = torchvision.utils.make_grid(pred[:10], nrow=5)
+            _true = torchvision.utils.make_grid(images[:10], nrow=5)
+            writer.add_image('Eval/generated', _generated, epoch)
+            writer.add_image('Eval/true', _true, epoch)
+
 
     return models[low_index + 1], generated_images
 
@@ -143,8 +156,8 @@ def train(train_dataloader, eval_dataloader, model, config):
 def process(train_dir_path, eval_dir_path, config):
 
     # params of normalization
-    _mean = 0
-    _std = 1
+    _mean = 0.5
+    _std = 0.5
 
     # read file path
     train_path_list = glob.glob(train_dir_path)
