@@ -7,7 +7,7 @@ class VAE(nn.Module):
     def __init__(self, image_size, z_dim, channels=1):
         super(VAE, self).__init__()
         self.input_dim = image_size
-        self.z_dim = z_dim
+        # self.z_dim = z_dim
         self.channels = channels
 
         # encoder -------------------------------------------------------------------------------------------------
