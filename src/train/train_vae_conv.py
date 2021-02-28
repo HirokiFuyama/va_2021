@@ -8,7 +8,6 @@ import torch.utils.data
 from torch import optim
 from torch.nn import functional as F
 from dataclasses import dataclass
-# import matplotlib.pyplot as plt
 from torch.utils.tensorboard import SummaryWriter
 
 from src.preprocess.image_loader import ImgDataset, ImageTransform
@@ -17,16 +16,16 @@ from src.vae.vae_conv import VAE
 
 @dataclass
 class Config:
-    lr: float = 1e-4
+    lr: float = 3e-5
     beta1: float = 0.9
     beta2: float = 0.9
     input_dim: int = 128
-    num_epoch: int = 1000
-    num_stopping: int = 5
+    num_epoch: int = 200
+    num_stopping: int = 50
     batch_size: int = 64
-    z_dim: int = 32
-    save_path: str = '../../model/vae/vae.pt'
-    log_path: str = '../../log/vae/vae_lr_1e-4'
+    z_dim: int = 50
+    save_path: str = '../../model/vae/vae_lr_1e4.pt'
+    log_path: str = '../../log/vae_conv/vae_lr_3e5_m0.5_s0.5_beta09_dim50'
 
 
 
@@ -143,7 +142,7 @@ def train(train_dataloader, eval_dataloader, model, config):
         print('timer:  {:.4f} sec.'.format(t_epoch_finish - t_epoch_start))
 
         # check generated image ---------------------------------------------------
-        if epoch % 10 == 0:
+        if epoch % 20 == 0:
             _generated = torchvision.utils.make_grid(pred[:10], nrow=5)
             _true = torchvision.utils.make_grid(images[:10], nrow=5)
             writer.add_image('Eval/generated', _generated, epoch)
